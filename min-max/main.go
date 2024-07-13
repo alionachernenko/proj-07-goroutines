@@ -9,6 +9,9 @@ import (
 type MinMax struct {
 	Min int
 	Max int
+}
+
+type Finder struct {
 	in  <-chan []int
 	out chan<- MinMax
 }
@@ -23,12 +26,14 @@ func main() {
 	resultsChan := make(chan MinMax)
 
 	generator := Generator{out: numbersChan, in: resultsChan}
-	minmax := MinMax{
+
+	finder := Finder{
 		in:  numbersChan,
 		out: resultsChan,
 	}
+
 	go generator.generateRandomNumbers(10)
-	go minmax.findMinMax()
+	go finder.findMinMax()
 
 	time.Sleep(2 * time.Second)
 }
@@ -48,8 +53,9 @@ func (g Generator) generateRandomNumbers(count int) {
 	fmt.Printf("Min: %v; Max: %v\n", res.Min, res.Max)
 }
 
-func (minmax MinMax) findMinMax() {
-	numbers := <-minmax.in
+func (finder Finder) findMinMax() {
+	numbers := <-finder.in
+	fmt.Print(numbers)
 
 	min := numbers[0]
 	max := numbers[0]
@@ -63,5 +69,5 @@ func (minmax MinMax) findMinMax() {
 		}
 	}
 
-	minmax.out <- MinMax{Min: min, Max: max}
+	finder.out <- MinMax{Min: min, Max: max}
 }
